@@ -62,6 +62,7 @@ router.get('/:quoteId', (req, res, next) => {
         });
 });
 
+/* To use this, need to pass propName and value ONLY! */
 router.patch('/:quoteId', (req, res, next) => {
     const quoteId = req.params.quoteId;
     const updateOps = {};
