@@ -27,6 +27,8 @@ app.use((req, res, next) => {
 });
 
 /*  Routes ============================================================================================================= */
+// All api paths will be this and the associated endpoint in route file.
+// Ex. url.com/quotes/updateQuote
 app.use('/quotes', quoteRoutes);
 
 /* Error Handling ====================================================================================================== */

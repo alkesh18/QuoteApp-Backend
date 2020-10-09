@@ -42,8 +42,8 @@ router.post('/', (req, res, next) => {
         });
 });
 
-router.get('/:quoteId', (req, res, next) => {
-    const quoteId = req.params.quoteId;
+router.get('/selectQuote', (req, res, next) => {
+    const quoteId = req.body.quoteId;
     Quote.findById(quoteId)
         .exec()
         .then(result => {
@@ -51,7 +51,7 @@ router.get('/:quoteId', (req, res, next) => {
             if (result) {
                 res.status(200).json(result);
             } else {
-                res.status(404).json({ message: 'No record with that id is found.' });
+                res.status(404).json({ message: 'No record with id = ' + quoteId + 'is found.' });
             }
         })
         .catch(err => {
@@ -62,11 +62,21 @@ router.get('/:quoteId', (req, res, next) => {
         });
 });
 
-/* To use this, need to pass propName and value ONLY! */
-router.patch('/:quoteId', (req, res, next) => {
-    const quoteId = req.params.quoteId;
+/* Example body to send to update client name:
+{
+    "quoteId": <replace with id>,
+    "operations": [
+        {
+            "propName": "client.cName",
+            "value": "New Name Here"
+        }
+    ]
+}
+*/
+router.patch('/updateQuote', (req, res, next) => {
+    const quoteId = req.body.quoteId;
     const updateOps = {};
-    for (const ops of req.body) {
+    for (const ops of req.body.operations) {
         updateOps[ops.propName] = ops.value;
     }
     Quote.update({ _id: quoteId }, { $set: updateOps })
@@ -80,8 +90,8 @@ router.patch('/:quoteId', (req, res, next) => {
         });
 });
 
-router.delete('/:quoteId', (req, res, next) => {
-    const quoteId = req.params.quoteId;
+router.delete('/deleteQuote', (req, res, next) => {
+    const quoteId = req.body.quoteId;
     Quote.remove({ _id: quoteId })
         .exec()
         .then(result => {
