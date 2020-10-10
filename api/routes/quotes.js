@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 
 const Quote = require('../models/quote');
 
+// Return all quotes
 router.get('/', (req, res, next) => {
     Quote.find()
         .exec()
@@ -20,6 +21,7 @@ router.get('/', (req, res, next) => {
         });
 });
 
+// Create a quote
 // CHANGE franchiseeid after we create franchisees
 router.post('/', (req, res, next) => {
     const quote = new Quote({
@@ -27,7 +29,7 @@ router.post('/', (req, res, next) => {
         franchiseeId: 1,
         client: req.body.client,
         services: req.body.services
-    });
+    }); 
     quote
         .save()
         .then(result => {
