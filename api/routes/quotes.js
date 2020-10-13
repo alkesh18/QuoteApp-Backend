@@ -8,7 +8,7 @@ const Quote = require('../models/quote');
 router.get('/', (req, res, next) => {
     Quote.find()
         .sort({ _id: -1 })
-        .limit(3)
+        .limit(5)
         .exec()
         .then(result => {
             if (result) {
