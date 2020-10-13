@@ -7,7 +7,7 @@ const quoteSchema = mongoose.Schema({
         cName: String,
         cAddress: String,
         cCity: String,
-        cPhoneNumber: String,
+        cPhoneNum: String,
         cEmail: String
     },
     services: [{
@@ -16,7 +16,8 @@ const quoteSchema = mongoose.Schema({
         materialCost: String,
         hoursRequired: String,
         totalCost: String
-    }]
+    }],
+    total: String
 });
 
 module.exports = mongoose.model('Quote', quoteSchema);

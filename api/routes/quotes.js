@@ -7,6 +7,8 @@ const Quote = require('../models/quote');
 // Return all quotes
 router.get('/', (req, res, next) => {
     Quote.find()
+        .sort({ _id: -1 })
+        .limit(3)
         .exec()
         .then(result => {
             if (result) {
@@ -27,9 +29,10 @@ router.post('/', (req, res, next) => {
     const quote = new Quote({
         _id: new mongoose.Types.ObjectId(),
         franchiseeId: 1,
-        client: req.body.client,
-        services: req.body.services
-    }); 
+        client: req.body.params.clientInfo,
+        services: req.body.params.serviceInfo,
+        total: req.body.params.total
+    });
     quote
         .save()
         .then(result => {
@@ -45,7 +48,7 @@ router.post('/', (req, res, next) => {
 });
 
 router.get('/selectQuote', (req, res, next) => {
-    const quoteId = req.body.quoteId;
+    const quoteId = req.body.params.quoteId;
     Quote.findById(quoteId)
         .exec()
         .then(result => {
@@ -76,9 +79,9 @@ router.get('/selectQuote', (req, res, next) => {
 }
 */
 router.patch('/updateQuote', (req, res, next) => {
-    const quoteId = req.body.quoteId;
+    const quoteId = req.body.params.quoteId;
     const updateOps = {};
-    for (const ops of req.body.operations) {
+    for (const ops of req.body.params.operations) {
         updateOps[ops.propName] = ops.value;
     }
     Quote.update({ _id: quoteId }, { $set: updateOps })
