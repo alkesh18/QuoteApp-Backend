@@ -24,7 +24,8 @@ router.get("/", (req, res, next) => {
 
 // Create a franchisee
 router.post("/", (req, res, next) => {
-  User.find({ username: req.body.params.username })
+  const username = req.body.params.username;
+  User.find({ username })
     .then((user) => {
       const franchisee = new Franchisee({
         _id: new mongoose.Types.ObjectId(),
@@ -56,11 +57,9 @@ router.get("/selectFranchisee", (req, res, next) => {
       if (result) {
         res.status(200).json(result);
       } else {
-        res
-          .status(404)
-          .json({
-            message: "No record with id = " + franchiseeId + "is found.",
-          });
+        res.status(404).json({
+          message: "No record with id = " + franchiseeId + "is found.",
+        });
       }
     })
     .catch((err) => {
@@ -101,7 +100,7 @@ router.patch("/updateFranchisee", (req, res, next) => {
 
 router.delete("/deleteFranchisee", (req, res, next) => {
   const franchiseeId = req.body.franchiseeId;
-  Franchisee.remove({ _id: franchiseeId })
+  Franchisee.remove({ franchiseeId: franchiseeId })
     .exec()
     .then((result) => {
       res.status(200).json(result);
