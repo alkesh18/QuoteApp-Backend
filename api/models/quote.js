@@ -2,22 +2,22 @@ const mongoose = require('mongoose');
 
 const quoteSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
-    franchiseeId: Number,
+    franchiseeId: {type: Number, ref: 'Franchisee', required: true },
     client: {
-        cName: String,
-        cAddress: String,
-        cCity: String,
-        cPhoneNum: String,
-        cEmail: String
+        cName: {type: String, required: true },
+        cAddress: {type: String, required: true },
+        cCity: {type: String, required: true },
+        cPhoneNum: {type: String, required: true },
+        cEmail: {type: String, required: true },
     },
     services: [{
-        selectedService: String,
-        description: String,
-        materialCost: String,
-        hoursRequired: String,
-        totalCost: String
+        selectedService: {type: String, required: true },
+        description: {type: String, required: true },
+        materialCost: {type: String, required: true },
+        hoursRequired: {type: String, required: true },
+        totalCost: {type: String, required: true }
     }],
-    total: String
+    total: {type: String, required: true }
 });
 
 module.exports = mongoose.model('Quote', quoteSchema);
