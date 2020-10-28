@@ -49,28 +49,32 @@ router.post("/register", (req, res, next) => {
 });
 
 router.get("/login", (req, res, next) => {
-  const userId = req.body.params.userId;
-  User.findById(userId)
+  const username = req.body.username;
+  const password = req.body.password;
+
+  User.findOne({username})
     .exec()
-    .then((result) => {
-      console.log(result);
-      if (result) {
-        res.status(200).json({
-          username: result.username,
-          role: result.role,
-          active: result.active,
-        });
+    .then((user) => {
+      console.log(user);
+      if (user) {
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+            if(isMatch) {
+                res.status(200).json({
+                    username: user.username,
+                    role: user.role,
+                    active: user.active,
+                });
+            } else {
+                res.status(404).json({ message: "Invalid credentials" });
+            }
+        })
       } else {
-        res
-          .status(404)
-          .json({ message: "No record with id = " + userId + "is found." });
+          res.status(500).json({message: "Invalid username"})
       }
     })
     .catch((err) => {
       console.log(err);
-      res.status(500).json({
-        error: err,
-      });
+      res.status(500).json({ error: err });
     });
 });
 
