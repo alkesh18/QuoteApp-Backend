@@ -3,10 +3,12 @@ const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const passport	= require('passport');
 
 const quoteRoutes = require('./api/routes/quotes');
 const franchiseeRoutes = require('./api/routes/franchisee');
 const authRoutes = require('./api/routes/user');
+const { pass } = require('./api/middleware/passport');
 
 const url = "mongodb+srv://admin:cdBgJ3GlZgHXydCu@cluster0.eesew.mongodb.net/quoteAppDb?retryWrites=true&w=majority"
 
@@ -21,6 +23,10 @@ mongoose.connect(url,
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+app.use(passport.initialize());
+const passportMiddleware = require("./api/middleware/passport");
+passport.use(passportMiddleware);
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");

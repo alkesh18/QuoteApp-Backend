@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
+const passport = require("passport");
 
 const User = require("../models/user");
 
@@ -11,7 +12,10 @@ router.get("/", (req, res, next) => {
     .exec()
     .then((result) => {
       if (result) {
-        res.status(200).json(result);
+        res.status(200).json({
+          count: result.length,
+          result: result,
+        });
       }
     })
     .catch((err) => {
@@ -24,15 +28,26 @@ router.get("/", (req, res, next) => {
 
 // Create a user
 router.post("/signup", (req, res, next) => {
-  const user = new User({
-    _id: new mongoose.Types.ObjectId(),
-    username: req.body.username,
-    password: req.body.password,
-    role: req.body.role,
-    active: req.body.active,
-  });
-  user
-    .save()
+  if (!req.body.username || !req.body.password) {
+    return res
+      .status(400)
+      .json({ msg: "Please enter a username and password" });
+  }
+  const username = req.body.username;
+  User.findOne({ username })
+    .exec()
+    .then((data) => {
+      if (data) res.status(400).json({ msg: "The user already exists" });
+      const user = new User({
+        _id: new mongoose.Types.ObjectId(),
+        username: req.body.username,
+        password: req.body.password,
+        franchiseeId: req.body.franchiseeId,
+        role: req.body.role,
+        active: req.body.active,
+      });
+      return user.save();
+    })
     .then((result) => {
       console.log(result);
       res.status(200).json(result);
@@ -45,7 +60,7 @@ router.post("/signup", (req, res, next) => {
     });
 });
 
-router.get("/login", (req, res, next) => {
+router.post("/login", (req, res, next) => {
   const username = req.body.username;
   const password = req.body.password;
 
@@ -53,27 +68,25 @@ router.get("/login", (req, res, next) => {
     .exec()
     .then((user) => {
       if (user) {
-        user.comparePassword(password,  (err, isMatch) => {
-          if (isMatch) {
-            console.log(`${user.username} authenicated`);
-            if (user.active) {
-              res.status(200).json({
-                username: user.username,
-                role: user.role,
-                active: user.active,
-                authenticated: true
-              });
-            } else {
-              res.status(404).json({ message: "Inactive user", error: err });
-            }
+        user.comparePassword(password, (err, isMatch) => {
+          if (isMatch && user.active) {
+            res.status(200).json({
+              id: user._id,
+              username: user.username,
+              franchiseeId: user.franchiseeId,
+              role: user.role,
+              active: user.active,
+              token: createToken(user)
+            });
           } else {
-            res
-              .status(404)
-              .json({ message: "Invalid credentials", error: err });
+            res.status(404).json({
+              message: "Invalid credentials or user inactive.",
+              error: err,
+            });
           }
         });
       } else {
-        res.status(500).json({ message: "Invalid username" });
+        res.status(500).json({ message: "Invalid username", error: err });
       }
     })
     .catch((err) => {
@@ -93,31 +106,41 @@ router.get("/login", (req, res, next) => {
     ]
 }
 */
-// router.patch("/updateUser", (req, res, next) => {
-//   const userId = req.body.params.userId;
-//   const updateOps = {};
-//   for (const ops of req.body.params.operations) {
-//     updateOps[ops.propName] = ops.value;
-//   }
-//   User.update({ _id: userId }, { $set: updateOps })
-//     .exec()
-//     .then((result) => res.status(200).json(result))
-//     .catch((err) => {
-//       console.log(err);
-//       res.status(500).json({
-//         error: err,
-//       });
-//     });
-// });
 
-router.patch("/disableUser", (req, res, next) => {
-  const userId = req.body.userid;
-  User.update({ _id: userId }, { $set: { active: false } })
+router.patch("/updateUser", (req, res, next) => {
+  const userId = req.body.userId;
+  const updateOps = {};
+  for (const ops of req.body.operations) {
+    updateOps[ops.propName] = ops.value;
+  }
+  User.update({ _id: userId }, { $set: updateOps })
     .exec()
-    .then((result) =>
+    .then((result) => res.status(200).json(result))
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({
+        error: err,
+      });
+    });
+});
+
+router.patch("/disableUser", passport.authenticate('jwt', { session: false }), (req, res, next) => {
+  const username = req.body.username;
+  User.findOne({ username }, (err, user) => {
+    if (user) {
+      user.active = false;
+      user.save();
+    } else {
+      res.status(404).json({
+        message: "Cannot find user.",
+        error: err,
+      });
+    }
+  })
+    .then((user) =>
       res.status(200).json({
         message: "User was disabled",
-        result: result,
+        active: user.active,
       })
     )
     .catch((err) => {
@@ -138,5 +161,11 @@ router.patch("/disableUser", (req, res, next) => {
   //     });
   //   });
 });
+
+let createToken = function(user) {
+  return jwt.sign({ id: user._id, role: user.role }, "test123", {
+    expiresIn: 300 
+  });
+}
 
 module.exports = router;
