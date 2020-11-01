@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express');
 const app = express();
 const morgan = require('morgan');
@@ -8,9 +9,8 @@ const passport	= require('passport');
 const quoteRoutes = require('./api/routes/quotes');
 const franchiseeRoutes = require('./api/routes/franchisee');
 const authRoutes = require('./api/routes/user');
-const { pass } = require('./api/middleware/passport');
 
-const url = "mongodb+srv://admin:cdBgJ3GlZgHXydCu@cluster0.eesew.mongodb.net/quoteAppDb?retryWrites=true&w=majority"
+const url = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.eesew.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
 
 mongoose.connect(url, 
     {

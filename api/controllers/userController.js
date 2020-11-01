@@ -1,3 +1,4 @@
+require('dotenv').config()
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
@@ -71,7 +72,7 @@ class UserController {
               franchiseeId: user.franchiseeId,
               role: user.role,
               active: user.active,
-              token: createToken(user),
+              token: this.createToken(user),
             });
           } else {
             res
@@ -124,7 +125,7 @@ class UserController {
   };
 
   createToken = (user) => {
-    return jwt.sign({ id: user._id, role: user.role }, "test123", {
+    return jwt.sign({ id: user._id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: 300,
     });
   };

@@ -7,9 +7,11 @@ const controller = new FranchiseeController();
 router.get("/", async (req, res, next) => controller.getAllFranchisees(req, res, next));
 // Create a franchisee
 router.post("/", async (req, res, next) => controller.createFranchisee(req, res, next));
+
+//need to pass franchiseeId
 router.get("/selectFranchisee", async (req, res, next) => controller.selectFranchisee(req, res, next));
 
-/* Example body to send to update client name:
+/* Example body to send to update franchise name:
 {
     "franchiseeId": <replace with id>,
     "operations": [
@@ -21,6 +23,7 @@ router.get("/selectFranchisee", async (req, res, next) => controller.selectFranc
 }
 */
 router.patch("/updateFranchisee", async(req, res, next) => controller.updateFranchisee(req, res, next));
+//need to pass franchiseeId
 router.delete("/deleteFranchisee", async(req, res, next) => controller.deleteFranchisee(req, res, next));
 
 module.exports = router;
