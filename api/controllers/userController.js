@@ -43,7 +43,8 @@ class UserController {
       });
 
       const result = await user.save();
-      res.status(200).json(result);
+      return result;
+      //res.status(200).json(result);
     } catch (err) {
       console.log(err);
       res.status(500).json({
@@ -126,7 +127,7 @@ class UserController {
 
   createToken = (user) => {
     return jwt.sign({ id: user._id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: 300,
+      expiresIn: "15m",
     });
   };
 }
