@@ -1,74 +1,57 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-const passport = require("passport")
+const passport = require("passport");
 
 const Franchisee = require("../models/franchisee");
 const User = require("../models/user");
 
 // Return all franchisees
-router.get("/", (req, res, next) => {
-  Franchisee.find()
-    .exec()
-    .then((result) => {
-      if (result) {
-        res.status(200).json(result);
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({
-        error: err,
+router.get("/", async (req, res, next) => {
+  try {
+    const franchisees = await Franchisee.find();
+    if (!!franchisees) {
+      res.status(200).json({
+        count: franchisees.length,
+        franchisees: franchisees,
       });
-    });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err });
+  }
 });
 
 // Create a franchisee
-router.post("/", (req, res, next) => {
-  const username = req.body.params.username;
-  User.find({ username })
-    .then((user) => {
-      const franchisee = new Franchisee({
-        _id: new mongoose.Types.ObjectId(),
-        franchiseeId: req.body.params.franchiseeId,
-        name: req.body.params.name,
-        email: req.body.params.email,
-        username: req.body.params.username,
-      });
-      return franchisee.save();
-    })
-    .then((result) => {
-      console.log(result);
-      res.status(200).json(result);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({
-        error: err,
-      });
+router.post("/", async (req, res, next) => {
+  try {
+    const username = req.body.username;
+    const user = await User.find({ username });
+    const franchisee = new Franchisee({
+      _id: new mongoose.Types.ObjectId(),
+      franchiseeId: req.body.franchiseeId,
+      name: req.body.name,
+      email: req.body.email,
+      username: req.body.username,
     });
+    const result = await franchisee.save();
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ error: err });
+  }
 });
 
-router.get("/selectFranchisee", (req, res, next) => {
-  const franchiseeId = req.body.params.franchiseeId;
-  Franchisee.findById(franchiseeId)
-    .exec()
-    .then((result) => {
-      console.log(result);
-      if (result) {
-        res.status(200).json(result);
-      } else {
-        res.status(404).json({
-          message: "No record with id = " + franchiseeId + "is found.",
+router.get("/selectFranchisee", async (req, res, next) => {
+  try {
+    const franchiseeId = req.body.franchiseeId;
+    const franchisee = await Franchisee.findById(franchiseeId);
+    return franchisee
+      ? res.status(200).json(franchisee)
+      : res.status(404).json({
+          message: `No record with id = ${franchiseeId} is found.`
         });
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({
-        error: err,
-      });
-    });
+  } catch (err) {
+    res.status(500).json({ error: err });
+  }
 });
 
 /* Example body to send to update client name:
@@ -82,36 +65,28 @@ router.get("/selectFranchisee", (req, res, next) => {
     ]
 }
 */
-router.patch("/updateFranchisee", (req, res, next) => {
-  const franchiseeId = req.body.params.franchiseeId;
-  const updateOps = {};
-  for (const ops of req.body.params.operations) {
-    updateOps[ops.propName] = ops.value;
+router.patch("/updateFranchisee", async(req, res, next) => {
+  try {
+    const franchiseeId = req.body.franchiseeId;
+    const updateOps = {};
+    for (const ops of req.body.operations) {
+      updateOps[ops.propName] = ops.value;
+    }
+    const result = await Franchisee.update({ _id: franchiseeId }, { $set: updateOps });
+    if(result) res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ error: err });
   }
-  Franchisee.update({ _id: franchiseeId }, { $set: updateOps })
-    .exec()
-    .then((result) => res.status(200).json(result))
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({
-        error: err,
-      });
-    });
 });
 
-router.delete("/deleteFranchisee", (req, res, next) => {
-  const franchiseeId = req.body.franchiseeId;
-  Franchisee.remove({ franchiseeId: franchiseeId })
-    .exec()
-    .then((result) => {
-      res.status(200).json(result);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({
-        error: err,
-      });
-    });
+router.delete("/deleteFranchisee", async(req, res, next) => {
+  try {
+    const franchiseeId = req.body.franchiseeId;
+    const result = await Franchisee.remove({ franchiseeId: franchiseeId });
+    if(result) res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ error: err });
+  }
 });
 
 module.exports = router;
