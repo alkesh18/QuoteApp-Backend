@@ -1,93 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
-
-const User = require("../models/user");
+const UserController = require('../controllers/userController')
+const controller = new UserController();
 
 // Return all users
-router.get("/", async (req, res, next) => {
-  try {
-    const users = await User.find();
-    if (!!users) {
-      res.status(200).json({
-        count: users.length,
-        users: users,
-      });
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      error: err,
-    });
-  }
-});
-
-// Create a user
-router.post("/signup", async (req, res, next) => {
-  try {
-    if (!req.body.username || !req.body.password) {
-      return res.status(400).json({
-        msg: "Please enter a username and password",
-      });
-    }
-
-    const username = req.body.username;
-    const existingUser = await User.findOne({ username });
-    if (existingUser) res.status(400).json({ msg: "The user already exists" });
-
-    const user = new User({
-      _id: new mongoose.Types.ObjectId(),
-      username: req.body.username,
-      password: req.body.password,
-      franchiseeId: req.body.franchiseeId,
-      role: req.body.role,
-      active: req.body.active,
-    });
-
-    const result = await user.save();
-    res.status(200).json(result);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      error: err,
-    });
-  }
-});
-
-router.post("/login", async (req, res, next) => {
-  try {
-    if (!req.body.username || !req.body.password) {
-      return res.status(400).json({
-        msg: "Please enter a username and password",
-      });
-    }
-
-    const username = req.body.username;
-    const password = req.body.password;
-    const user = await User.findOne({ username });
-    if(user) {
-      user.comparePassword(password, (err, isMatch) => {
-        if (isMatch && user.active) {
-          res.status(200).json({
-            id: user._id,
-            username: user.username,
-            franchiseeId: user.franchiseeId,
-            role: user.role,
-            active: user.active,
-            token: createToken(user),
-          });
-        } else {
-          res.status(404).json({ message: "Invalid credentials or user inactive." });
-        }
-      });
-    } else {
-      res.status(404).json({ message: "Invalid username" });
-    }   
-  } catch (err) {
-    res.status(500).json({ error: err });
-  }
-});
+router.get("/", async (req, res, next) => controller.getAllUsers(req, res, next));
+router.post("/signup", async (req, res, next) => controller.signUp(req, res, next));
+router.post("/login", async (req, res, next) => controller.login(req, res, next));
 
 /* Example body to send to update client name:
 {
@@ -100,47 +19,7 @@ router.post("/login", async (req, res, next) => {
     ]
 }
 */
-router.patch("/updateUser", async (req, res, next) => {
-  try {
-    const userId = req.body.userId;
-    const updateOps = {};
-
-    for (const ops of req.body.operations) {
-      updateOps[ops.propName] = ops.value;
-    }
-    
-    const result = User.update({ _id: userId }, { $set: updateOps });
-    if(result) res.status(200).json(result);
-  } catch (err) {
-    res.status(500).json({ error: err });
-  }
-});
-
-router.patch("/disableUser", async (req, res, next) => {
-  try {
-    const username = req.body.username;
-    const user = await User.findOne({ username });
-
-    if(user) {
-      user.active = false;
-      await user.save();
-      res.status(200).json({
-        message: "User was disabled",
-        active: user.active,
-      })
-    } else {
-      res.status(404).json({ message: "Cannot find user" });
-    }
-
-  } catch (err) {
-    res.status(500).json({ error: err });
-  } 
-});
-
-let createToken = function (user) {
-  return jwt.sign({ id: user._id, role: user.role }, "test123", {
-    expiresIn: 300,
-  });
-};
+router.patch("/updateUser", async (req, res, next) => controller.updateUser(req, res, next));
+router.patch("/disableUser", async (req, res, next) => controller.disableUser(req, res, next));
 
 module.exports = router;
