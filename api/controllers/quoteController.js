@@ -2,7 +2,7 @@ const Quote = require("../models/quote");
 const mongoose = require("mongoose");
 
 class QuoteController {
-  getAllQuotes = async function (req, res, next) {
+  getAllQuotes = async (req, res, next) => {
     try {
       const quotes = await Quote.find().sort({ _id: -1 }).limit(5);
       if (quotes)

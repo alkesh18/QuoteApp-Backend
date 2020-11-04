@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
 class UserController {
-  getAllUsers = async function (req, res, next) {
+  getAllUsers = async (req, res, next) => {
     try {
       const users = await User.find();
       if (!!users) {
@@ -21,7 +21,7 @@ class UserController {
     }
   };
 
-  signUp = async function (req, res, next) {
+  signUp = async (req, res, next) => {
     try {
       if (!req.body.username || !req.body.password) {
         return res.status(400).json({
@@ -31,7 +31,8 @@ class UserController {
 
       const username = req.body.username;
       const existingUser = await User.findOne({ username });
-      if (existingUser) res.status(400).json({ msg: "The user already exists" });
+      if (existingUser)
+        res.status(400).json({ msg: "The user already exists" });
 
       const user = new User({
         _id: new mongoose.Types.ObjectId(),
@@ -53,7 +54,7 @@ class UserController {
     }
   };
 
-  login = async function (req, res, next) {
+  login = async (req, res, next) => {
     try {
       if (!req.body.username || !req.body.password) {
         return res.status(400).json({
@@ -89,7 +90,7 @@ class UserController {
     }
   };
 
-  updateUser = async function (req, res, next) {
+  updateUser = async (req, res, next) => {
     try {
       const userId = req.body.userId;
       const updateOps = {};
@@ -105,7 +106,7 @@ class UserController {
     }
   };
 
-  disableUser = async function (req, res, next) {
+  disableUser = async (req, res, next) => {
     try {
       const username = req.body.username;
       const user = await User.findOne({ username });
@@ -126,7 +127,11 @@ class UserController {
   };
 
   createToken = (user) => {
-    return jwt.sign({ id: user._id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, {
+    return jwt.sign({ 
+      id: user._id, 
+      role: user.role,
+      franchiseeId: user.franchiseeId
+     }, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: "15m",
     });
   };

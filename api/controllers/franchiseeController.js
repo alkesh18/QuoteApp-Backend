@@ -5,7 +5,7 @@ const UserController = require('../controllers/userController');
 const userController = new UserController();
 
 class FranchiseeController {
-  getAllFranchisees = async function (req, res, next) {
+  getAllFranchisees = async (req, res, next) => {
     try {
       const franchisees = await Franchisee.find();
       if (!!franchisees) {
@@ -19,8 +19,13 @@ class FranchiseeController {
     }
   };
 
-  createFranchisee = async function (req, res, next) {
+  createFranchisee = async (req, res, next) => {
     try {
+      if (!req.body.username || !req.body.password) {
+        return res.status(400).json({
+          msg: "Please enter a username and password",
+        });
+      }
       const username = req.body.username;
       const user = await User.findOne({ username });
       if(user) {
@@ -49,7 +54,7 @@ class FranchiseeController {
     }
   };
 
-  selectFranchisee = async function (req, res, next) {
+  selectFranchisee = async (req, res, next) => {
     try {
       const franchiseeId = req.body.franchiseeId;
       const franchisee = await Franchisee.findById(franchiseeId);
@@ -63,7 +68,7 @@ class FranchiseeController {
     }
   };
 
-  updateFranchisee = async function (req, res, next) {
+  updateFranchisee = async (req, res, next) => {
     try {
       const franchiseeId = req.body.franchiseeId;
       const updateOps = {};
@@ -80,7 +85,7 @@ class FranchiseeController {
     }
   };
 
-  deleteFranchisee = async function (req, res, next) {
+  deleteFranchisee = async (req, res, next) => {
     try {
       const franchiseeId = req.body.franchiseeId;
       const result = await Franchisee.remove({ franchiseeId: franchiseeId });
