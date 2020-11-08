@@ -7,7 +7,7 @@ const checkAuth = require('../middleware/check-auth')
 // Return all users
 router.get("/", async (req, res, next) => controller.getAllUsers(req, res, next));
 router.post("/signup", async (req, res, next) => controller.signUp(req, res, next));
-router.post("/login", async (req, res, next) => controller.login(req, res, next));
+router.get("/login", async (req, res, next) => controller.login(req, res, next));
 
 /* Example body to send to update client name:
 {
@@ -22,5 +22,6 @@ router.post("/login", async (req, res, next) => controller.login(req, res, next)
 */
 router.patch("/updateUser", checkAuth, async (req, res, next) => controller.updateUser(req, res, next));
 router.patch("/disableUser", checkAuth, async (req, res, next) => controller.disableUser(req, res, next));
+router.delete("/deleteUser", async (req, res, next) => controller.deleteUser(req, res, next));
 
 module.exports = router;

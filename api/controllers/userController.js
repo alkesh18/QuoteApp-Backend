@@ -39,7 +39,7 @@ class UserController {
         username: req.body.username,
         password: req.body.password,
         franchiseeId: req.body.franchiseeId,
-        role: req.body.role,
+        admin: req.body.admin,
         active: req.body.active,
         name: req.body.name,
         email: req.body.email
@@ -57,14 +57,15 @@ class UserController {
 
   login = async (req, res, next) => {
     try {
-      if (!req.body.username || !req.body.password) {
+      console.log(req.body);
+      if (!req.body.params.username || !req.body.params.password) {
         return res.status(400).json({
           msg: "Please enter a username and password",
         });
       }
 
-      const username = req.body.username;
-      const password = req.body.password;
+      const username = req.body.params.username;
+      const password = req.body.params.password;
       const user = await User.findOne({ username });
       if (user) {
         user.comparePassword(password, (err, isMatch) => {
@@ -75,7 +76,7 @@ class UserController {
               franchiseeId: user.franchiseeId,
               name: user.name,
               email: user.email,
-              role: user.role,
+              admin: user.admin,
               active: user.active,
               token: this.createToken(user),
             });
@@ -129,6 +130,22 @@ class UserController {
     }
   };
 
+  deleteUser = async (req, res, next) => {
+    try {
+      const username = req.body.username; 
+      const user = await User.findOneAndDelete({ username });
+      if(user) {
+        res.status(200).json({
+          message: "User was deleted"
+        });
+      } else {
+        res.status(404).json({ message: "User was not deleted." });
+      }
+    } catch (error) {
+      res.status(500).json({ error });
+    }
+  }
+
   createToken = (user) => {
     if(!user.active) {
       res.status(500).json({ error: "Cannot create token on inactive user" });
@@ -136,7 +153,7 @@ class UserController {
       return jwt.sign({ 
         id: user._id,
         username: user.username, 
-        role: user.role,
+        admin: user.admin,
         franchiseeId: user.franchiseeId,
         active: user.active,
        }, process.env.ACCESS_TOKEN_SECRET, {

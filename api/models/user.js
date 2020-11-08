@@ -8,7 +8,7 @@ const userSchema = mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   franchiseeId: { type: Number, required: true },
-  role: { type: String, required: true },
+  admin: { type: Boolean, required: true },
   active: { type: Boolean, required: true },
 });
 

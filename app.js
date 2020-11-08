@@ -4,7 +4,7 @@ const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const passport	= require('passport');
+// const passport	= require('passport');
 
 const quoteRoutes = require('./api/routes/quotes');
 const franchiseeRoutes = require('./api/routes/franchisee');
@@ -25,9 +25,9 @@ app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.use(passport.initialize());
-const passportMiddleware = require("./api/middleware/passport");
-passport.use(passportMiddleware);
+// app.use(passport.initialize());
+// const passportMiddleware = require("./api/middleware/passport");
+// passport.use(passportMiddleware);
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
