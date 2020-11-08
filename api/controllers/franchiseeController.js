@@ -56,8 +56,8 @@ class FranchiseeController {
 
   selectFranchisee = async (req, res, next) => {
     try {
-      const franchiseeId = req.body.franchiseeId;
-      const franchisee = await Franchisee.findById(franchiseeId);
+      const username = req.body.username;
+      const franchisee = await Franchisee.find({username});
       return franchisee
         ? res.status(200).json(franchisee)
         : res.status(404).json({

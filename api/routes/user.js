@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const UserController = require('../controllers/userController')
 const controller = new UserController();
+const checkAuth = require('../middleware/check-auth')
 
 // Return all users
 router.get("/", async (req, res, next) => controller.getAllUsers(req, res, next));
@@ -19,7 +20,7 @@ router.post("/login", async (req, res, next) => controller.login(req, res, next)
     ]
 }
 */
-router.patch("/updateUser", async (req, res, next) => controller.updateUser(req, res, next));
-router.patch("/disableUser", async (req, res, next) => controller.disableUser(req, res, next));
+router.patch("/updateUser", checkAuth, async (req, res, next) => controller.updateUser(req, res, next));
+router.patch("/disableUser", checkAuth, async (req, res, next) => controller.disableUser(req, res, next));
 
 module.exports = router;

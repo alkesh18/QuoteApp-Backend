@@ -6,11 +6,11 @@ const User = require("../models/user");
 class UserController {
   getAllUsers = async (req, res, next) => {
     try {
-      const users = await User.find();
+      const users = await User.find().select({ password: 0 });
       if (!!users) {
         res.status(200).json({
           count: users.length,
-          users: users,
+          users: users
         });
       }
     } catch (err) {
@@ -32,7 +32,7 @@ class UserController {
       const username = req.body.username;
       const existingUser = await User.findOne({ username });
       if (existingUser)
-        res.status(400).json({ msg: "The user already exists" });
+        return res.status(400).json({ msg: "The user already exists" });
 
       const user = new User({
         _id: new mongoose.Types.ObjectId(),
@@ -41,13 +41,14 @@ class UserController {
         franchiseeId: req.body.franchiseeId,
         role: req.body.role,
         active: req.body.active,
+        name: req.body.name,
+        email: req.body.email
       });
 
       const result = await user.save();
       return result;
       //res.status(200).json(result);
     } catch (err) {
-      console.log(err);
       res.status(500).json({
         error: err,
       });
@@ -72,6 +73,8 @@ class UserController {
               id: user._id,
               username: user.username,
               franchiseeId: user.franchiseeId,
+              name: user.name,
+              email: user.email,
               role: user.role,
               active: user.active,
               token: this.createToken(user),
@@ -127,13 +130,20 @@ class UserController {
   };
 
   createToken = (user) => {
-    return jwt.sign({ 
-      id: user._id, 
-      role: user.role,
-      franchiseeId: user.franchiseeId
-     }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: "15m",
-    });
+    if(!user.active) {
+      res.status(500).json({ error: "Cannot create token on inactive user" });
+    } else {
+      return jwt.sign({ 
+        id: user._id,
+        username: user.username, 
+        role: user.role,
+        franchiseeId: user.franchiseeId,
+        active: user.active,
+       }, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+    }
+    
   };
 }
 
