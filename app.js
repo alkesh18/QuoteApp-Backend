@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
 const quoteRoutes = require('./api/routes/quotes');
+const authRoutes = require('./api/routes/user');
 const url = "mongodb+srv://admin:cdBgJ3GlZgHXydCu@cluster0.eesew.mongodb.net/quoteAppDb?retryWrites=true&w=majority"
 
 mongoose.connect(url, 
@@ -30,6 +31,7 @@ app.use((req, res, next) => {
 // All api paths will be this and the associated endpoint in route file.
 // Ex. url.com/quotes/updateQuote
 app.use('/quotes', quoteRoutes);
+app.use('/users', authRoutes);
 
 /* Error Handling ====================================================================================================== */
 app.use((req, res, next) => {
