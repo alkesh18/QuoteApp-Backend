@@ -7,7 +7,6 @@ class QuoteController {
       const quotes = await Quote.find().sort({ _id: -1 }).limit(5);
       if (quotes)
         return res.status(200).json({
-          count: quotes.length,
           quotes: quotes,
         });
     } catch (err) {
@@ -17,9 +16,10 @@ class QuoteController {
 
   createQuote = async (req, res, next) => {
     try {
-      const clientInfo = req.body.clientInfo;
-      const serviceInfo = req.body.serviceInfo;
-      const total = req.body.total;
+      console.log(req.body);
+      const clientInfo = req.body.params.clientInfo;
+      const serviceInfo = req.body.params.serviceInfo;
+      const total = req.body.params.total;
       if (clientInfo && serviceInfo && total) {
         const quote = new Quote({
           _id: new mongoose.Types.ObjectId(),
@@ -28,11 +28,12 @@ class QuoteController {
           services: req.body.params.serviceInfo,
           total: req.body.params.total,
         });
-        await quote.save();
+        const result = await quote.save();
         res.status(200).json(result);
       }
     } catch (err) {
-      res.status(500).json({ error: err });
+      res.status(500).json({ error: err,
+      msg: "create quote failed" });
     }
   };
 
@@ -50,11 +51,27 @@ class QuoteController {
     }
   };
 
+  selectQuoteByFranchisee = async (req, res, next) => {
+    try {
+      const franchiseeId = req.body.params;
+      console.log("body", req.body);
+      const quotes = await Quote.find({ franchiseeId });
+      console.log(quotes);
+      return quotes
+        ? res.status(200).json(quotes)
+        : res.status(404).json({
+            message: `No record for franchisee is found.`,
+          });
+    } catch (err) {
+      res.status(500).json({ error: err });
+    }
+  }
+
   updateQuote = async (req, res, next) => {
     try {
-      const quoteId = req.body.quoteId;
+      const quoteId = req.body.params.quoteId;
       const updateOps = {};
-      for (const ops of req.body.operations) {
+      for (const ops of req.body.params.operations) {
         updateOps[ops.propName] = ops.value;
       }
       const result = await Quote.update({ _id: quoteId }, { $set: updateOps });
@@ -70,7 +87,7 @@ class QuoteController {
 
   deleteQuote = async (req, res, next) => {
     try {
-      const quoteId = req.body.quoteId;
+      const quoteId = req.body.params.quoteId;
       const result = await Quote.remove({ _id: quoteId });
       return result
         ? res.status(200).json(result)

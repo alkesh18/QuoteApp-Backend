@@ -8,8 +8,9 @@ const controller = new QuoteController();
 // Return all quotes
 router.get("/", async(req, res, next) => controller.getAllQuotes(req, res, next));
 // Create a quote
-router.post("/", async(req, res, next) => controller.createController(req, res, next));
+router.post("/", async(req, res, next) => controller.createQuote(req, res, next));
 router.get("/selectQuote", async(req, res, next) => controller.selectQuote(req, res, next));
+router.get("/selectQuoteByFranchisee", async(req, res, next) => controller.selectQuoteByFranchisee(req, res, next));
 
 /* Example body to send to update client name:
 {

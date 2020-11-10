@@ -59,7 +59,7 @@ class UserController {
       console.log(req.body);
       if (!req.body.params.username || !req.body.params.password) {
         return res.status(400).json({
-          msg: "Please enter a username and password",
+          message: "Please enter a username and password",
         });
       }
 
