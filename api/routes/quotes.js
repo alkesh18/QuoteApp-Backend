@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const emailHelper = require('../../helpers/email');
 
 const Quote = require('../models/quote');
 
@@ -38,6 +39,14 @@ router.post('/', (req, res, next) => {
         .then(result => {
             console.log(result);
             res.status(200).json(result);
+            const email = new emailHelper()
+            to = quote.client.cEmail
+            clientName = quote.client.cName
+            serviceTotalCost = quote.total
+
+
+            email.sendEmail(to, clientName, quote.services , serviceTotalCost)
+
         })
         .catch(err => {
             console.log(err);
