@@ -1,5 +1,6 @@
 const Quote = require("../models/quote");
 const mongoose = require("mongoose");
+const emailHelper = require("../helpers/email");
 
 class QuoteController {
   getAllQuotes = async (req, res, next) => {
@@ -30,6 +31,7 @@ class QuoteController {
         });
         const result = await quote.save();
         res.status(200).json(result);
+        sendEmail(quote);
       }
     } catch (err) {
       res.status(500).json({ error: err,
@@ -98,6 +100,16 @@ class QuoteController {
       res.status(500).json({ error: err });
     }
   };
+}
+
+sendEmail = (quote) => {
+  const email = new emailHelper;
+  let clientEmail = quote.client.cEmail;
+  let clientName = quote.client.cName;
+  let services = quote.services
+  let sevicesTotalCost = quote.total;
+
+  email.sendEmail(clientEmail, clientName, services, sevicesTotalCost);
 }
 
 module.exports = QuoteController;
