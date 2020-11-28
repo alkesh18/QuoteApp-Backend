@@ -1,5 +1,6 @@
 require('dotenv').config()
 const mongoose = require("mongoose");
+const user = require('../models/user');
 const User = require("../models/user");
 
 class UserController {
@@ -20,28 +21,45 @@ class UserController {
     }
   };
 
+  getPrevId = async (req, res, next) => {
+    try {
+      const users = await User.find().select({ password: 0 }).sort({ _id: -1 }).limit(1);
+      if (!!users) {
+        res.status(200).json({
+          franchiseeId: users[0].franchiseeId
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        error: err,
+      });
+    }
+
+  }
+
   signUp = async (req, res, next) => {
     try {
-      if (!req.body.username || !req.body.password) {
+      if (!req.body.params.username || !req.body.params.password) {
         return res.status(400).json({
           msg: "Please enter a username and password",
         });
       }
 
-      const username = req.body.username;
+      const username = req.body.params.username;
       const existingUser = await User.findOne({ username });
       if (existingUser)
         return res.status(400).json({ msg: "The user already exists" });
 
       const user = new User({
         _id: new mongoose.Types.ObjectId(),
-        username: req.body.username,
-        password: req.body.password,
-        franchiseeId: req.body.franchiseeId,
-        admin: req.body.admin,
-        active: req.body.active,
-        name: req.body.name,
-        email: req.body.email
+        username: req.body.params.username,
+        password: req.body.params.password,
+        franchiseeId: req.body.params.franchiseeId,
+        admin: req.body.params.admin,
+        active: req.body.params.active,
+        name: req.body.params.name,
+        email: req.body.params.email
       });
 
       const result = await user.save();
