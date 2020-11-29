@@ -9,9 +9,29 @@ class UserController {
       const users = await User.find().select({ password: 0 });
       if (!!users) {
         res.status(200).json({
-          count: users.length,
-          users: users
+          users
         });
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        error: err,
+      });
+    }
+  };
+
+  getAllOtherUsers = async (req, res, next) => {
+    try {
+      const uName = req.body.params.username;
+      console.log(uName);
+      const users = await User.find({ $nor: [{username: uName}, {active: false}]}).select({ password: 0 });
+      //console.log(users)
+      if (!!users) {
+        res.status(200).json({
+          users
+        });
+      } else {
+        res.status(404).json({msg: "username no found"})
       }
     } catch (err) {
       console.log(err);
@@ -129,7 +149,8 @@ class UserController {
 
   disableUser = async (req, res, next) => {
     try {
-      const username = req.body.username;
+      const username = req.body.params.username;
+      console.log(req.body);
       const user = await User.findOne({ username });
 
       if (user) {
@@ -149,7 +170,7 @@ class UserController {
 
   deleteUser = async (req, res, next) => {
     try {
-      const username = req.body.username; 
+      const username = req.body.params.username; 
       const user = await User.findOneAndDelete({ username });
       if(user) {
         res.status(200).json({

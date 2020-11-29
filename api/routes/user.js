@@ -5,6 +5,7 @@ const controller = new UserController();
 
 // Return all users
 router.get("/", async (req, res, next) => controller.getAllUsers(req, res, next));
+router.post("/getOtherUsers", async (req, res, next) => controller.getAllOtherUsers(req, res, next));
 router.get("/getPrevId", async (req, res, next) => controller.getPrevId(req, res, next));
 router.post("/signup", async (req, res, next) => controller.signUp(req, res, next));
 router.post("/login", async (req, res, next) => controller.login(req, res, next));
