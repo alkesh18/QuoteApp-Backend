@@ -1,10 +1,14 @@
 const Quote = require("../models/quote");
 const mongoose = require("mongoose");
+const emailHelper = require("../helpers/email");
 
 class QuoteController {
   getAllQuotes = async (req, res, next) => {
     try {
-      const quotes = await Quote.find().sort({ _id: -1 }).limit(5);
+      const franchiseeId = req.url.toString();
+      const urlParams = franchiseeId.split("=");
+      console.log("req body", franchiseeId);
+      const quotes = await Quote.find({franchiseeId: urlParams[1]}).sort({ _id: -1 }).limit(10);
       if (quotes)
         return res.status(200).json({
           quotes: quotes,
@@ -14,22 +18,25 @@ class QuoteController {
     }
   };
 
+
   createQuote = async (req, res, next) => {
     try {
       console.log(req.body);
       const clientInfo = req.body.params.clientInfo;
       const serviceInfo = req.body.params.serviceInfo;
       const total = req.body.params.total;
-      if (clientInfo && serviceInfo && total) {
+      const franchiseeId = req.body.params.franchiseeId;
+      if (clientInfo && serviceInfo && total && franchiseeId) {
         const quote = new Quote({
           _id: new mongoose.Types.ObjectId(),
-          franchiseeId: 1,
+          franchiseeId: franchiseeId,
           client: req.body.params.clientInfo,
           services: req.body.params.serviceInfo,
           total: req.body.params.total,
         });
         const result = await quote.save();
         res.status(200).json(result);
+        sendEmail(quote);
       }
     } catch (err) {
       res.status(500).json({ error: err,
@@ -98,6 +105,16 @@ class QuoteController {
       res.status(500).json({ error: err });
     }
   };
+}
+
+sendEmail = (quote) => {
+  const email = new emailHelper;
+  let clientEmail = quote.client.cEmail;
+  let clientName = quote.client.cName;
+  let services = quote.services
+  let sevicesTotalCost = quote.total;
+
+  email.sendEmail(clientEmail, clientName, services, sevicesTotalCost);
 }
 
 module.exports = QuoteController;
