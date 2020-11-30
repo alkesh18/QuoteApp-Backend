@@ -17,6 +17,17 @@ class QuoteController {
       return res.status(500).json({ error: err });
     }
   };
+  getAllQuotesWithNoID = async (req, res, next) => {
+    try {
+      const quotes = await Quote.find().sort({ _id: -1 }).limit(100);
+      if (quotes)
+        return res.status(200).json({
+          quotes: quotes,
+        });
+    } catch (err) {
+      return res.status(500).json({ error: err });
+    }
+  };
 
 
   createQuote = async (req, res, next) => {
@@ -94,8 +105,14 @@ class QuoteController {
 
   deleteQuote = async (req, res, next) => {
     try {
-      const quoteId = req.body.params.quoteId;
-      const result = await Quote.remove({ _id: quoteId });
+      /*const quoteId = req.url.toString();
+      const urlParams = quoteId.split("=");
+      */
+      console.log(req.url.toString());
+      const quoteId = req.url.toString();;
+      const urlParams = quoteId.split("=");
+      const result = await Quote.remove({ _id: urlParams[1] });
+      console.log(result);
       return result
         ? res.status(200).json(result)
         : res.status(404).json({
