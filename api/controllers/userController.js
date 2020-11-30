@@ -2,6 +2,8 @@ require('dotenv').config()
 const mongoose = require("mongoose");
 const user = require('../models/user');
 const User = require("../models/user");
+const bcrypt = require("bcrypt");
+const { update } = require('../models/user');
 
 class UserController {
   getAllUsers = async (req, res, next) => {
@@ -133,15 +135,30 @@ class UserController {
 
   updateUser = async (req, res, next) => {
     try {
-      const userId = req.body.userId;
+      const userId = req.body.params.userId;
       const updateOps = {};
 
-      for (const ops of req.body.operations) {
+      for (const ops of req.body.params.operations) {
         updateOps[ops.propName] = ops.value;
       }
 
-      const result = User.update({ _id: userId }, { $set: updateOps });
-      if (result) res.status(200).json(result);
+      console.log(updateOps);
+      if(updateOps.password != undefined && updateOps.password != "" && updateOps.password != null) {
+        bcrypt.genSalt(10, function (err, salt) {
+          if (err) return next(err);
+          bcrypt.hash(updateOps.password, salt, async function (err, hash) {
+            if (err) return next(err);
+            updateOps.password = hash;
+            console.log("inner", updateOps.password);
+            let result = await User.update({ _id: userId }, { $set: updateOps });
+            if (result) res.status(200).json(result);
+          });
+        });
+        
+      } else {
+        let result = await User.update({ _id: userId }, { $set: updateOps });
+        if (result) res.status(200).json(result);
+      }
     } catch (err) {
       res.status(500).json({ error: err });
     }
