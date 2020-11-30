@@ -6,7 +6,8 @@ const QuoteController = require('../controllers/quoteController')
 const controller = new QuoteController();
 
 // Return all quotes
-router.get("/getAll", async(req, res, next) => controller.getAllQuotes(req, res, next));
+router.get("/", async(req, res, next) => controller.getAllQuotes(req, res, next));
+router.get("/getAllNoID", async(req, res, next) => controller.getAllQuotesWithNoID(req, res, next));
 // Create a quote
 router.post("/", async(req, res, next) => controller.createQuote(req, res, next));
 router.get("/selectQuote", async(req, res, next) => controller.selectQuote(req, res, next));
